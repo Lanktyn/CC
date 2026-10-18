@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Chroma Cases</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&display=swap">
+<style>
+:root{color-scheme:light;--bg:#ecebe7;--card:#f8f7f4;--ink:#22232a;--mute:#6d6f78;--line:#d4d2cb;--btn:#22232a;--btnt:#f8f7f4;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#202228;--card:#2b2d35;--ink:#ecebe7;--mute:#9a9ca6;--line:#41444e;--btn:#ecebe7;--btnt:#202228}}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#202228;--card:#2b2d35;--ink:#ecebe7;--mute:#9a9ca6;--line:#41444e;--btn:#ecebe7;--btnt:#202228}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Bricolage Grotesque",system-ui,sans-serif;line-height:1.4}
+main{max-width:1000px;margin:0 auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+h1{font-size:30px;font-weight:800;margin:0;letter-spacing:-.02em}
+.bal{font-size:26px;font-weight:800}.sub{color:var(--mute);font-size:13px}
+.cases{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.case{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:8px}
+.case .band{height:34px;border-radius:6px}
+.case b{font-size:16px}.odds{font-size:11px;color:var(--mute);line-height:1.5}
+button{font:inherit;font-weight:600;background:var(--btn);color:var(--btnt);border:0;border-radius:7px;padding:8px 12px;cursor:pointer}
+button:disabled{opacity:.35;cursor:not-allowed}
+button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+button.on{outline:2px solid var(--ink)}
+.stage{margin:14px 0;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;display:flex;gap:16px;align-items:center;min-height:150px;flex-wrap:wrap}
+.sw{width:120px;height:120px;border-radius:10px;border:1px solid var(--line);flex:none;position:relative;overflow:hidden}
+.shiny::after{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.75) 50%,transparent 70%);background-size:250% 100%;animation:sh 1.8s linear infinite}
+@keyframes sh{from{background-position:150% 0}to{background-position:-100% 0}}
+.info h2{margin:0 0 2px;font-size:22px}.tag{font-weight:800}
+.bar{display:flex;gap:6px;flex-wrap:wrap;margin:16px 0 8px;align-items:center}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(54px,1fr));gap:6px}
+.t{aspect-ratio:1;border-radius:6px;position:relative;cursor:pointer;border:2px solid transparent;overflow:hidden}
+.t.lock{background:var(--line)!important;opacity:.45}
+.t.sel{border-color:var(--ink)}
+.t i{position:absolute;right:2px;bottom:1px;font:700 10px/1 sans-serif;background:rgba(0,0,0,.55);color:#fff;padding:2px 3px;border-radius:3px;font-style:normal}
+.t .rb{position:absolute;left:0;top:0;width:100%;height:4px}
+.detail{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:8px;display:none;gap:12px;align-items:center;flex-wrap:wrap}
+.detail.show{display:flex}
+.toast{font-size:13px;color:var(--mute);min-height:18px}
+.auto{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:10px 0}.auto select{font:inherit;padding:7px;border-radius:7px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+.mini{width:26px;height:26px;border-radius:5px;border:2px solid;display:inline-block;position:relative;overflow:hidden}.batch{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px}
+h3{margin:16px 0 8px;font-size:16px}
+footer{margin:20px 0;font-size:12px;color:var(--mute)}
+</style></head>
+<body><main>
+<header><div><h1>Chroma Cases</h1><div class="sub" id="stats"></div></div><div style="text-align:right"><div class="bal" id="bal"></div><div class="sub" id="prog"></div></div></header>
+<section class="cases" id="cases"></section>
+<section class="stage" id="stage"><div class="sw" id="sw" style="background:var(--line)"></div><div class="info" id="info"><h2>Open a case</h2><div class="sub">Rare colors are very rare. Duplicates are normal. Shinies (5%) sell for 30% more.</div></div></section>
+<div class="batch" id="batch"></div>
+<h3>Upgrades</h3><section class="cases" id="ups"></section>
+<div class="auto"><span id="autolbl" class="sub"></span><select id="autocase"></select><button id="autobtn"></button></div>
+<div class="toast" id="toast"></div>
+<div class="bar" id="filters"></div>
+<div class="detail" id="detail"></div>
+<div class="grid" id="grid"></div>
+<h3>Codes</h3><div class="auto"><input id="codein" type="text" placeholder="Enter code" autocomplete="off" style="font:inherit;padding:8px;border-radius:7px;border:1px solid var(--line);background:var(--card);color:var(--ink)"><button id="redeem">Redeem</button><span class="sub" id="codemsg"></span></div>
+<footer>Progress saves in this browser. Reset clears everything: <button class="ghost" id="reset">Reset game</button></footer>
+</main>
+<script>
+const TIERS=[
+{n:"Common",c:"#9aa0a6",v:3,k:200},{n:"Uncommon",c:"#4caf6a",v:12,k:130},{n:"Rare",c:"#3b8fe0",v:60,k:90},
+{n:"Epic",c:"#9b59d6",v:400,k:50},{n:"Legendary",c:"#f0a020",v:2500,k:20},{n:"Mythic",c:"#e8344e",v:20000,k:8},{n:"Divine",c:"#ffffff",v:150000,k:2}];
+// weights per tier in percent: Common..Divine
+const CASES=[
+{n:"Free Case",p:0,w:[72,23.5,4.2,.28,.02,0,0],b:"#9aa0a6"},
+{n:"Bronze Case",p:30,w:[60,29,9.5,1.35,.15,.01,.0005],b:"#b87333"},
+{n:"Silver Case",p:150,w:[40,36,18,5,.9,.09,.005],b:"#b8bcc4"},
+{n:"Gold Case",p:750,w:[20,38,28,11.5,2.2,.28,.02],b:"#e0b020"},
+{n:"Platinum Case",p:4000,w:[5,30,38,20,6,.9,.1],b:"#6fd0d0"},
+{n:"Prismatic Case",p:20000,w:[0,18,44,28,8,1.8,.2],b:"linear-gradient(90deg,#f33,#fc3,#3c6,#39f,#93f)"}];
+const SHINY=.05,SHINY_MULT=1.3,AUTO_AT=150;
+const SPEED=[1500,1200,900,650,450,300],SPEED_COST=[2000,10000,50000,250000,1000000];
+const MULTI=[1,2,3,5,10,25],MULTI_COST=[10000,100000,1000000,10000000,100000000];
+const FAM=[["Red",0],["Vermilion",10],["Orange",25],["Amber",40],["Yellow",55],["Chartreuse",75],["Lime",95],["Green",125],["Emerald",150],["Mint",165],["Teal",178],["Cyan",190],["Sky",202],["Azure",214],["Blue",225],["Cobalt",235],["Indigo",250],["Violet",265],["Purple",280],["Orchid",295],["Magenta",310],["Fuchsia",325],["Pink",338],["Rose",350],["Crimson",358]];
+const MOD=[["Pale",35,88],["Soft",45,80],["Light",70,75],["Bright",100,60],["Vivid",95,50],["Pure",85,45],["Deep",80,35],["Dark",70,25],["Midnight",60,15],["Muted",30,60],["Dusty",25,50],["Ash",15,70],["Smoky",15,40],["Faded",40,65],["Rich",90,40],["Royal",100,30],["Electric",100,55],["Pastel",60,85],["Burnt",75,32],["Frosted",50,92]];
+function rng(a){return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const R=rng(20260);
+const COLORS=[];
+FAM.forEach(([f,h])=>MOD.forEach(([m,s,l],j)=>COLORS.push({name:m+" "+f,css:`hsl(${h+(j%3-1)*3},${s}%,${l}%)`})));
+const order=COLORS.map((_,i)=>i).sort(()=>R()-.5);
+let p=0;const BYTIER=TIERS.map(()=>[]);
+TIERS.forEach((t,ti)=>{for(let i=0;i<t.k;i++){const c=COLORS[order[p++]];c.t=ti;c.v=Math.max(1,Math.round(t.v*(.8+R()*.4)));BYTIER[ti].push(c)}});
+COLORS.forEach((c,i)=>c.id=i);
+const $=id=>document.getElementById(id);
+const fmt=n=>n>=1e6?(n/1e6).toFixed(2)+"M":n>=1e4?(n/1e3).toFixed(1)+"k":n.toLocaleString();
+const money=n=>"$"+fmt(n);
+let S={bal:0,inv:{},opened:0,free:0,shinies:0,up:{speed:0,multi:0}};
+try{const x=localStorage.getItem("chromacases");if(x)S=Object.assign(S,JSON.parse(x))}catch(e){}
+const save=()=>{try{localStorage.setItem("chromacases",JSON.stringify(S))}catch(e){}};
+const val=(c,sh)=>sh?Math.round(c.v*SHINY_MULT):c.v;
+let busy=false,auto=false,filter=-1,ownedOnly=false,sel=null;
+
+function pickTier(w){let r=Math.random()*w.reduce((a,b)=>a+b,0);for(let i=0;i<w.length;i++){if((r-=w[i])<0&&w[i]>0)return i}return w.findIndex(x=>x>0)}
+function open(ci){
+ if(busy)return false;const cs=CASES[ci];
+ let q=MULTI[S.up.multi];
+ if(cs.p>0)q=Math.min(q,Math.floor(S.bal/cs.p));
+ if(q<1)return false;
+ S.bal-=cs.p*q;busy=true;S.opened+=q;
+ const res=[];
+ for(let i=0;i<q;i++){const t=pickTier(cs.w),c=BYTIER[t][Math.floor(Math.random()*BYTIER[t].length)],sh=Math.random()<SHINY;const key=c.id+(sh?"s":"");S.inv[key]=(S.inv[key]||0)+1;if(sh)S.shinies++;res.push({c,sh,key})}
+ save();
+ const sw=$("sw");sw.classList.remove("shiny");$("info").innerHTML='<h2>Opening…</h2>';$("batch").innerHTML="";
+ const dur=SPEED[S.up.speed],steps=Math.max(3,Math.round(dur/100));let n=0;
+ const iv=setInterval(()=>{sw.style.background=COLORS[Math.floor(Math.random()*500)].css;if(++n>=steps){clearInterval(iv);finish(res)}},dur/steps);
+ render();return true;
+}
+function finish(res){
+ const sc=r=>r.c.t*1e7+val(r.c,r.sh);
+ const best=res.reduce((a,b)=>sc(b)>sc(a)?b:a);
+ if(res.length>1)$("batch").innerHTML=res.map(r=>`<span class="mini ${r.sh?"shiny":""}" style="background:${r.c.css};border-color:${TIERS[r.c.t].c}" title="${r.c.name}"></span>`).join("");
+ reveal(best.c,best.sh,best.key,res.length);
+}
+function reveal(c,sh,key,n){
+ const T=TIERS[c.t];$("sw").style.background=c.css;$("sw").classList.toggle("shiny",sh);
+ $("info").innerHTML=`<h2>${sh?"✦ Shiny ":""}${c.name}</h2><div class="tag" style="color:${c.t==6?"var(--ink)":T.c}">${T.n}</div><div class="sub">Worth ${money(val(c,sh))}${sh?" (+30% shiny bonus)":""} · you own ${S.inv[key]}${n>1?` · best of ${n} cases`:""}</div>`;
+ sel=key;busy=false;render();
+}
+function sell(key,all){
+ const n=S.inv[key]||0;if(!n)return;const c=COLORS[parseInt(key)],sh=key.endsWith("s");
+ const q=all?n:1;S.bal+=q*val(c,sh);S.inv[key]-=q;if(!S.inv[key])delete S.inv[key];
+ $("toast").textContent=`Sold ${q} × ${sh?"Shiny ":""}${c.name} for ${money(q*val(c,sh))}`;save();render();
+}
+function sellDupes(){let tot=0;for(const k in S.inv){const c=COLORS[parseInt(k)],sh=k.endsWith("s");const q=S.inv[k]-1;if(q>0){tot+=q*val(c,sh);S.inv[k]=1}}
+ S.bal+=tot;$("toast").textContent=tot?`Sold duplicates for ${money(tot)}`:"No duplicates to sell";save();render()}
+
+function render(){
+ const owned=new Set(Object.keys(S.inv).map(k=>parseInt(k)));
+ $("bal").textContent=money(S.bal);renderUp();
+ $("prog").textContent=`${owned.size} / 500 colors collected`;
+ $("stats").textContent=`${S.opened} cases opened · ${S.shinies} shinies found`;
+ $("cases").innerHTML=CASES.map((c,i)=>{
+  const odds=c.w.map((x,j)=>x>0?`<span style="color:${TIERS[j].c==="#ffffff"?"var(--ink)":TIERS[j].c}">${TIERS[j].n}</span> ${x}%`:"").filter(Boolean).slice(2).join("<br>");
+  const m=MULTI[S.up.multi];
+  const dis=busy||S.bal<c.p;
+  return `<div class="case"><div class="band" style="background:${c.b}"></div><b>${c.n}</b><div class="odds">${odds}</div><button data-o="${i}" ${dis?"disabled":""}>${i===0?"Open free":"Open · "+money(c.p)}${m>1?" ×"+m:""}</button></div>`}).join("");
+ $("cases").querySelectorAll("[data-o]").forEach(b=>b.onclick=()=>open(+b.dataset.o));
+ $("filters").innerHTML=`<button class="ghost ${filter<0?"on":""}" data-f="-1">All</button>`+TIERS.map((t,i)=>`<button class="ghost ${filter===i?"on":""}" data-f="${i}"><span style="color:${t.c==="#ffffff"?"var(--ink)":t.c}">●</span> ${t.n}</button>`).join("")+`<button class="ghost ${ownedOnly?"on":""}" id="oo">Owned only</button><button id="sd">Sell duplicates</button>`;
+ $("filters").querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>{filter=+b.dataset.f;render()});
+ $("oo").onclick=()=>{ownedOnly=!ownedOnly;render()};$("sd").onclick=sellDupes;
+ const list=[...COLORS].sort((a,b)=>b.t-a.t||a.id-b.id).filter(c=>filter<0||c.t===filter);
+ let h="";
+ if(ownedOnly){const it=[];for(const c of list){const n=S.inv[c.id]||0,ns=S.inv[c.id+"s"]||0;if(n)it.push([c,false,n]);if(ns)it.push([c,true,ns])}
+  it.sort((a,b)=>val(a[0],a[1])-val(b[0],b[1])||a[0].id-b[0].id);h=it.map(x=>tile(x[0],x[1],x[2])).join("")}
+ else for(const c of list){
+  const n=S.inv[c.id]||0,ns=S.inv[c.id+"s"]||0;
+  if(n||!ownedOnly&&!ns)h+=tile(c,false,n);
+  if(ns)h+=tile(c,true,ns);
+ }
+ $("grid").innerHTML=h;
+ $("grid").querySelectorAll(".t").forEach(e=>e.onclick=()=>{sel=e.dataset.k;render()});
+ const d=$("detail");
+ if(sel&&S.inv[sel]){const c=COLORS[parseInt(sel)],sh=sel.endsWith("s"),q=S.inv[sel];
+  d.className="detail show";d.innerHTML=`<div class="sw ${sh?"shiny":""}" style="width:56px;height:56px;background:${c.css}"></div><div style="flex:1;min-width:150px"><b>${sh?"✦ Shiny ":""}${c.name}</b><div class="sub">${TIERS[c.t].n} · ${money(val(c,sh))} each · own ${q}</div></div><button id="s1">Sell one</button>${q>1?'<button id="sa" class="ghost">Sell all</button>':""}`;
+  $("s1").onclick=()=>sell(sel,false);if(q>1)$("sa").onclick=()=>sell(sel,true);
+ }else if(sel&&!sel.endsWith("s")&&COLORS[parseInt(sel)]){const c=COLORS[parseInt(sel)];d.className="detail show";d.innerHTML=`<div class="sw" style="width:56px;height:56px;background:var(--line)"></div><div><b>Undiscovered</b><div class="sub">${TIERS[c.t].n} · base value ${money(c.v)}</div></div>`}
+ else d.className="detail";
+}
+function tile(c,sh,n){const k=c.id+(sh?"s":"");
+ return `<div class="t ${n?"":"lock"} ${sh?"shiny":""} ${sel===k?"sel":""}" data-k="${k}" style="background:${c.css}" title="${n?c.name:"???"}"><span class="rb" style="background:${TIERS[c.t].c}"></span>${n>1?`<i>×${n}</i>`:""}</div>`}
+$("reset").onclick=()=>{if(confirm("Erase all progress?")){S={bal:0,inv:{},opened:0,free:0,shinies:0,up:{speed:0,multi:0}};sel=null;save();render()}};
+function renderUp(){
+ const u=S.up,sp=u.speed<SPEED_COST.length,mu=u.multi<MULTI_COST.length;
+ $("ups").innerHTML=`<div class="case"><b>Open speed</b><div class="odds">Now ${(SPEED[u.speed]/1000).toFixed(2)}s per open${sp?` → ${(SPEED[u.speed+1]/1000).toFixed(2)}s`:" (max)"}</div><button data-u="speed" ${!sp||S.bal<SPEED_COST[u.speed]?"disabled":""}>${sp?"Upgrade · "+money(SPEED_COST[u.speed]):"Maxed"}</button></div><div class="case"><b>Cases at once</b><div class="odds">Now ${MULTI[u.multi]}${mu?` → ${MULTI[u.multi+1]}`:" (max)"}</div><button data-u="multi" ${!mu||S.bal<MULTI_COST[u.multi]?"disabled":""}>${mu?"Upgrade · "+money(MULTI_COST[u.multi]):"Maxed"}</button></div>`;
+ $("ups").querySelectorAll("[data-u]").forEach(b=>b.onclick=()=>{const k=b.dataset.u,cost=(k==="speed"?SPEED_COST:MULTI_COST)[S.up[k]];if(cost===undefined||S.bal<cost)return;S.bal-=cost;S.up[k]++;save();render()});
+ const ok=S.opened>=AUTO_AT||S.autoUnlock;
+ $("autobtn").disabled=!ok;$("autocase").disabled=!ok;
+ $("autobtn").textContent=auto?"Auto-open: ON":"Auto-open: OFF";
+ $("autolbl").textContent=ok?"Auto-open:":`Auto-open unlocks at ${AUTO_AT} cases opened (${S.opened}/${AUTO_AT})`;
+}
+$("autocase").innerHTML=CASES.map((c,i)=>`<option value="${i}">${c.n}</option>`).join("");
+$("autobtn").onclick=()=>{auto=!auto;renderUp()};
+function redeem(){const v=$("codein").value.trim().toUpperCase(),m=$("codemsg");
+ if(v==="COLORMATCHING"){if(S.autoUnlock)m.textContent="Code already redeemed.";else{S.autoUnlock=true;save();m.textContent="Code accepted: auto-open unlocked!";renderUp()}}
+ else m.textContent="Invalid code.";$("codein").value=""}
+$("redeem").onclick=redeem;$("codein").onkeydown=e=>{if(e.key==="Enter")redeem()};
+setInterval(()=>{if(auto&&!busy&&!open(+$("autocase").value)){auto=false;renderUp()}},100);
+render();
+</script></body></html>
